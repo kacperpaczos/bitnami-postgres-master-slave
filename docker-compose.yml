@@ -1,0 +1,42 @@
+version: '3'
+
+services:
+  postgresql-master:
+    image: 'bitnami/postgresql:14.6.0'
+    ports:
+      - '5432'
+    volumes:
+      - 'postgresql_master_data:/bitnami/postgresql'
+    environment:
+      - POSTGRESQL_REPLICATION_MODE=master
+      - POSTGRESQL_REPLICATION_USER=repliaction_user
+      - POSTGRESQL_REPLICATION_PASSWORD=repliaction_password
+      - POSTGRESQL_USERNAME=root
+      - POSTGRESQL_PASSWORD=database_password
+      - POSTGRESQL_DATABASE=database
+  postgresql-slave:
+    image: 'bitnami/postgresql:14.6.0'
+    ports:
+      - '5432'
+    depends_on:
+      - postgresql-master
+    environment:
+      - POSTGRESQL_REPLICATION_MODE=slave
+      - POSTGRESQL_REPLICATION_USER=repliaction_user
+      - POSTGRESQL_REPLICATION_PASSWORD=repliaction_password
+      - POSTGRESQL_MASTER_HOST=postgresql-master
+      - POSTGRESQL_PASSWORD=database_password
+      - POSTGRESQL_MASTER_PORT_NUMBER=5432
+      
+  adminer:
+    image: adminer
+    restart: always
+    #networks:
+    #  postgres-network:
+    #    ipv4_address: 172.28.0.21
+    #    aliases:
+    #      - adminer
+    ports:
+      - 5755:8080
+volumes:
+  postgresql_master_data:
